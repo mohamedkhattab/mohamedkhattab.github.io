@@ -1,1 +1,8 @@
-<span class="border-b border-black p-4 pl-6">{{ title }}</span>
+<span class="border-b border-black p-4 pl-6">
+  <p>
+    <a class="hover:underline" href="{{ url }}" target="_blank">{{ title }}  #{{ number }}</a>
+  </p>
+  <p class="text-gray-300">
+    last updated: {{ updatedAt }}
+  </p>
+</span>

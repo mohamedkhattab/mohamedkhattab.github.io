@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.prList {
+  @apply bg-gray-700
+           grid
+           grid-cols-1
+           auto-rows-min
+           max-h-96
+           overflow-y-scroll
+           scrollbar-thin
+         scrollbar-track-black
+         scrollbar-thumb-gray-400
+         text-white rounded-md;
+}
