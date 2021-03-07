@@ -33,7 +33,11 @@ module.exports = {
           "css-loader",
           "postcss-loader"
         ]
-      }
+      },
+      {
+        test: /\.html$/i,
+        loader: "html-loader",
+      },
     ]
   }
 }
