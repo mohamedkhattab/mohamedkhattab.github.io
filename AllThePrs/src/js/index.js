@@ -73,7 +73,7 @@ const msToDaysAndHours = (ms) => {
   return `${d} day(s), ${pad(h)} hour(s) ago`;
 }
 
-const fetchAllPrs = async (repo, token) => {
+const fetchAllPrs = async (repo, token) => { 
   const res = await fetch(`https://api.github.com/repos/iubenda/${repo}/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-desc&per_page=500`, {
     headers: {
       "Authorization": `token ${token}`
@@ -171,7 +171,9 @@ const setAppContent = async (repoName) => {
 }
 
 const init = () => {
-  setAppContent(getState(REPO_NAME) || repoNames["Cookie Solution"]);
+  if (!getState(REPO_NAME)) setState(REPO_NAME, repoNames["Cookie Solution"]);
+
+  setAppContent(getState(REPO_NAME));
   appElement.addEventListener("click", (evt) => {
     const target = evt.target;
     if (target.id === repoSelectorId && target.value !== getState(REPO_NAME)) {
