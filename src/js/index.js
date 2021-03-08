@@ -10,14 +10,21 @@ import option from "../components/selectComponent/option.html";
 
 import spinner from "../components/spinnerComponent/spinner.html";
 
+import tokenForm from "../components/tokenFormComponent/tokenForm.html";
+
 const GTIHUB_TOKEN = "GTIHUB_TOKEN";
+const REPO_NAME = "REPO_NAME";
 const repoNames = {
   "Cookie Solution": "iub_cookie_solution",
   "Mater": "mater",
   "Radar": "iubenda-radar",
 };
 const repoSelectorId = "repo-selector";
+const githubTokenInputId = "github-token-input";
+const githubTokenSubmitId = "github-token-submit";
 const appElement = document.querySelector(".app");
+
+const githubTokenRegex = /^[0-9a-f]{40}$/;
 
 const setState = (prop, value) => {
   localStorage.setItem(prop, value)
@@ -132,7 +139,7 @@ const createRepoSelector = (repoNames, repoSelectorId) => {
     options += render(option, {
       text: name,
       value: repoNames[name],
-      selected: (repoNames[name] === getState("repoName"))? "selected" : "",
+      selected: (repoNames[name] === getState(REPO_NAME))? "selected" : "",
     });
   });
 
@@ -142,25 +149,44 @@ const createRepoSelector = (repoNames, repoSelectorId) => {
 };
 
 const setAppContent = async (repoName) => {
-  appElement.innerHTML = render(spinner);
-  
-  const prs = await fetchAllPrs(repoName, getGithubToken(GTIHUB_TOKEN));
-  appElement.innerHTML =
-    createRepoSelector(repoNames, repoSelectorId) +
-    createPrListContainer(
-      createPrLists(
-        createPrListItems(prs)
-      )
-    );
+  const token = getState(GTIHUB_TOKEN);
+
+  if (!token) {
+    appElement.innerHTML = render(tokenForm, {
+      githubTokenInputId: githubTokenInputId,
+      githubTokenSubmitId: githubTokenSubmitId
+    });
+  } else {
+    appElement.innerHTML = render(spinner);
+
+    const prs = await fetchAllPrs(repoName, getGithubToken(GTIHUB_TOKEN));
+    appElement.innerHTML =
+      createRepoSelector(repoNames, repoSelectorId) +
+      createPrListContainer(
+        createPrLists(
+          createPrListItems(prs)
+        )
+      );
+  }
 }
 
 const init = () => {
-  setAppContent(getState("repoName") || repoNames["Cookie Solution"]);
+  setAppContent(getState(REPO_NAME) || repoNames["Cookie Solution"]);
   appElement.addEventListener("click", (evt) => {
     const target = evt.target;
-    if (target.id === repoSelectorId && target.value !== getState("repoName")) {
-      setState("repoName", target.value);
-      setAppContent( getState("repoName") );
+    if (target.id === repoSelectorId && target.value !== getState(REPO_NAME)) {
+      setState(REPO_NAME, target.value);
+      setAppContent( getState(REPO_NAME) );
+    }
+
+    if (target.id === githubTokenSubmitId) {
+      const token = document.querySelector(`#${githubTokenInputId}`).value;
+      if (!githubTokenRegex.test(token)) {
+        alert("invalid token, please try again");
+      } else {
+        setState(GTIHUB_TOKEN, token);
+        setAppContent( getState(REPO_NAME) );
+      }
     }
   });
 };
