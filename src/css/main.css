@@ -2,15 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --fg: #ABB2BF;
+  --bg: #282C34;
+  --bg-1: #121417;
+  --bg-h1: #2C323C;
+  --gutter: #4B5363;
+  --mono-1: #ABB2BF;
+  --mono-2: #828997;
+  --mono-3: #5C6370;
+  --cyan: #56B6C2;
+  --blue: #61AFEF;
+  --purple: #C678DD;
+  --green: #98C379;
+  --red-1: #E06C75;
+  --red-2: #BE5046;
+  --orange-1: #D19A66;
+  --orange-2: #E5C07B;
+  --gray: #3E4451;
+  --silver: #9DA5B4;
+  --black: #21252B;
+  --border: #181A1F;
+}
+
+.background {
+  background-color: var(--bg);
+  color: white;
+}
+
+.header {
+  background-color: var(--bg-1);
+}
+
+.element {
+  background-color: var(--bg-h1);
+}
+
 .prList {
-  @apply bg-gray-700
-           grid
-           grid-cols-1
-           auto-rows-min
-           max-h-96
-           overflow-y-scroll
-           scrollbar-thin
-         scrollbar-track-black
-         scrollbar-thumb-gray-400
-         text-white rounded-md;
+  background-color: var(--gutter);
+  border-color: var(--border);
+  @apply  grid
+          grid-cols-1
+          auto-rows-min
+          max-h-96
+          overflow-y-scroll
+          scrollbar-thin
+        scrollbar-track-black
+        scrollbar-thumb-gray-400
+          rounded-md;
 }
