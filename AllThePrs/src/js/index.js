@@ -136,10 +136,12 @@ const createRepoSelector = (repoNames, repoSelectorId) => {
   let options = "";
 
   Object.keys(repoNames).forEach((name) => {
+    let selected = "";
+    if (repoNames[name] === getState(REPO_NAME)) selected = "selected";
     options += render(option, {
       text: name,
       value: repoNames[name],
-      selected: (repoNames[name] === getState(REPO_NAME))? "selected" : "",
+      selected: selected,
     });
   });
 
