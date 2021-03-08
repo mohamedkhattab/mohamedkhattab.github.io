@@ -2,12 +2,39 @@ import "../css/main.css";
 
 import prList from "../components/prListComponent/prList.html";
 import prListItem from "../components/prListComponent/prListItem.html";
+import prListContainer from "../components/prListComponent/prListContainer.html";
+
+import repoSelector from "../components/repoSelectorComponent/repoSelector.html";
+import select from "../components/selectComponent/select.html";
+import option from "../components/selectComponent/option.html";
 
 const GTIHUB_TOKEN = "GTIHUB_TOKEN";
-const cs = "iub_cookie_solution";
-const mater = "mater";
+const repoNames = {
+  "Cookie Solution": "iub_cookie_solution",
+  "Mater": "mater",
+  "Radar": "iubenda-radar",
+};
+const repoSelectorId = "repo-selector";
+const appElement = document.querySelector(".app");
 
-let getGithubToken = (tokenName) => {
+const setState = (prop, value) => {
+  localStorage.setItem(prop, value)
+};
+
+const getState = (prop) => {
+  return localStorage.getItem(prop)
+}
+
+const objectToArray = (obj, storeKeys = false) => {
+  let arr = [];
+  Object.keys(obj).forEach((key) => {
+    arr.push((storeKeys)? {...obj[key], key: key} : obj[key]);
+  });
+
+  return arr;
+};
+
+const getGithubToken = (tokenName) => {
   let token = localStorage.getItem(tokenName);
   while (!token) {
     token = prompt("Please enter a github token:", "");
@@ -17,13 +44,13 @@ let getGithubToken = (tokenName) => {
   return token;
 }
 
-let render = (tmpl, params = {}) => {
+const render = (tmpl, params = {}) => {
   return tmpl.replaceAll(/\{\{(.+?)\}\}/g, (_, content) => {
     return params[content.trim()];
   });
 }
 
-let msToDaysAndHours = (ms) => {
+const msToDaysAndHours = (ms) => {
   const cd = 24 * 60 * 60 * 1000;
   const ch = 60 * 60 * 1000;
   const d = Math.floor(ms / cd);
@@ -37,7 +64,7 @@ let msToDaysAndHours = (ms) => {
   return `${d} day(s), ${pad(h)} hour(s) ago`;
 }
 
-let fetchAllPrs = async (repo, token) => {
+const fetchAllPrs = async (repo, token) => {
   const res = await fetch(`https://api.github.com/repos/iubenda/${repo}/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-desc&per_page=500`, {
     headers: {
       "Authorization": `token ${token}`
@@ -47,7 +74,7 @@ let fetchAllPrs = async (repo, token) => {
   return await res.json();
 }
 
-let createPrListItems = (prs) => {
+const createPrListItems = (prs) => {
   let devs = {};
   Object.keys(prs).forEach((pr) => {
     if (prs[pr].assignee) {
@@ -71,14 +98,20 @@ let createPrListItems = (prs) => {
   return devs;
 }
 
-let createPrLists = (devs) => {
+const createPrLists = (devs) => {
   let allLists = "";
-  Object.keys(devs).forEach((devHandle) => {
+  let devsArr = objectToArray(devs, true);
+  
+  devsArr = devsArr.sort((a, b) => {
+    return b["prCount"] - a["prCount"];
+  });
+  
+  devsArr.forEach((dev) => {
     const devPrList = render(prList, {
-      developerHandle: devHandle,
-      items: devs[devHandle].items,
-      prCount: devs[devHandle].prCount,
-      url: devs[devHandle].url,
+      developerHandle: dev.key,
+      items: dev.items,
+      prCount: dev.prCount,
+      url: dev.url,
     });
     allLists += devPrList;
   });
@@ -86,15 +119,49 @@ let createPrLists = (devs) => {
   return allLists;
 };
 
-const init = async () => {
-  document.querySelector(".app").innerHTML =
-    createPrLists(
-      createPrListItems(
-        await fetchAllPrs(cs, 
-          getGithubToken(GTIHUB_TOKEN)
+const createPrListContainer = (prLists) => {
+  return render(prListContainer, {prLists: prLists});
+};
+
+const createRepoSelector = (repoNames, repoSelectorId) => {
+  let options = "";
+
+  Object.keys(repoNames).forEach((name) => {
+    options += render(option, {
+      text: name,
+      value: repoNames[name],
+      selected: (repoNames[name] === getState("repoName"))? "selected" : "",
+    });
+  });
+
+  const selector = render(select, {options: options, id: repoSelectorId});
+
+  return render(repoSelector, {selector: selector});
+};
+
+const setAppContent = async (repoName) => {
+  appElement.innerHTML =
+    createRepoSelector(repoNames, repoSelectorId) +
+    createPrListContainer(
+      createPrLists(
+        createPrListItems(
+          await fetchAllPrs(repoName,
+            getGithubToken(GTIHUB_TOKEN)
+          )
         )
       )
     );
+}
+
+const init = () => {
+  setAppContent(getState("repoName") || repoNames["Cookie Solution"]);
+  appElement.addEventListener("click", (evt) => {
+    const target = evt.target;
+    if (target.id === repoSelectorId && target.value !== getState("repoName")) {
+      setState("repoName", target.value);
+      setAppContent( getState("repoName") );
+    }
+  });
 };
 
 init();
