@@ -39,7 +39,7 @@
 }
 
 .prList {
-  background-color: var(--gutter);
+  background-color: var(--gray);
   border-color: var(--border);
   @apply  grid
           grid-cols-1

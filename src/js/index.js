@@ -8,6 +8,8 @@ import repoSelector from "../components/repoSelectorComponent/repoSelector.html"
 import select from "../components/selectComponent/select.html";
 import option from "../components/selectComponent/option.html";
 
+import spinner from "../components/spinnerComponent/spinner.html";
+
 const GTIHUB_TOKEN = "GTIHUB_TOKEN";
 const repoNames = {
   "Cookie Solution": "iub_cookie_solution",
@@ -140,15 +142,14 @@ const createRepoSelector = (repoNames, repoSelectorId) => {
 };
 
 const setAppContent = async (repoName) => {
+  appElement.innerHTML = render(spinner);
+  
+  const prs = await fetchAllPrs(repoName, getGithubToken(GTIHUB_TOKEN));
   appElement.innerHTML =
     createRepoSelector(repoNames, repoSelectorId) +
     createPrListContainer(
       createPrLists(
-        createPrListItems(
-          await fetchAllPrs(repoName,
-            getGithubToken(GTIHUB_TOKEN)
-          )
-        )
+        createPrListItems(prs)
       )
     );
 }
